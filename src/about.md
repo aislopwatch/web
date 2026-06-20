@@ -43,6 +43,3 @@ Spotted one in the wild? Screenshot it before they quietly delete it. Note
 where you found it, what gave it away, and who profits from the post. The
 receipts are the whole point — anyone can say "this is slop," we prefer
 exhibits.
-
-> If a human would be embarrassed to have written it, and no human will admit
-> to having written it, it is probably slop.
