@@ -34,9 +34,6 @@ Note where you found it, what gave it away, and who profits — exhibits beat
 assertions. The community votes 👍 / 👎; winners (or an editor's nod) get
 published automatically, credited to you.
 
-> If a human would be embarrassed to have written it, and no human will admit to
-> having written it, it is probably slop.
-
 ## No trackers, no slop
 
 System fonts only. No webfonts, no third-party scripts, no cookies, no analytics
