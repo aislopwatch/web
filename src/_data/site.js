@@ -10,7 +10,8 @@ export default {
   // OG image url. Can be overridden in CI via SITE_URL for a preview deploy.
   url: process.env.SITE_URL || "https://aislopwatch.com",
 
-  // The CODE repo — drives "submit a sighting" links and the issue pipeline.
+  // The public repo — drives "submit a sighting" links (Issues), the issue
+  // pipeline, and giscus comments (Discussions). Public, but anonymous.
   repo: "aislopwatch/web",
 
   author: {
@@ -18,15 +19,15 @@ export default {
     email: "",
   },
 
-  // Comments via giscus (GitHub Discussions) in a SEPARATE public repo, so the
-  // code repo can stay private. Set up once:
-  //   1. the comments repo must be PUBLIC, with Discussions enabled
-  //   2. install the giscus app on it
-  //   3. go to https://giscus.app/, enter aislopwatch/aislopwatch-comments,
-  //      copy repoId + categoryId into the placeholders below, set enabled: true
+  // Comments via giscus (GitHub Discussions) in this same public repo. Set up
+  // once, then flip enabled:true:
+  //   1. enable the Discussions feature on aislopwatch/web
+  //   2. install the giscus app (https://github.com/apps/giscus) on it
+  //   3. go to https://giscus.app/, enter aislopwatch/web, mapping = pathname,
+  //      copy repoId + categoryId into the placeholders below
   comments: {
     enabled: false,
-    repo: "aislopwatch/aislopwatch-comments",
+    repo: "aislopwatch/web",
     repoId: "REPLACE_WITH_GISCUS_REPO_ID",
     category: "Announcements",
     categoryId: "REPLACE_WITH_GISCUS_CATEGORY_ID",

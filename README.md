@@ -160,20 +160,24 @@ features — GitHub Pages can't run those), served at the root of **aislopwatch.
 
 Full setup (D1, bindings, domain, secrets) lives in `.local/CLOUDFLARE.md`.
 
-## Comments (giscus)
+## Community: submissions + comments (one public repo)
 
-Comments use [giscus](https://giscus.app/), stored in **GitHub Discussions** in a
-**separate public repo** — `aislopwatch/aislopwatch-comments` — so this code repo
-can stay private. The comments repo holds no code, only the discussion threads.
+This repo is **public but anonymous** (commits are authored as `AISlopWatch`).
+Two community features both live here:
 
-To wire them up (once):
+- **Submissions** → people open an **Issue** via the
+  [slop-sighting form](.github/ISSUE_TEMPLATE/slop-sighting.yml); the
+  publish workflow turns voted/approved ones into posts.
+- **Comments** → [giscus](https://giscus.app/) stores them as **GitHub
+  Discussions** in this same repo (keyed by post pathname).
 
-1. The comments repo must be **public** with the **Discussions** feature on, and
-   the [giscus app](https://github.com/apps/giscus) installed on it.
-2. Go to https://giscus.app/, enter `aislopwatch/aislopwatch-comments`, mapping
-   **pathname**, and copy the `repoId` and `categoryId`.
-3. Paste those into the `comments` block in `src/_data/site.js` and set
-   `enabled: true`. (Threads are keyed by pathname, independent of the code repo.)
+Wire up giscus once, then flip `enabled: true`:
+
+1. Enable the **Discussions** feature on `aislopwatch/web`, and install the
+   [giscus app](https://github.com/apps/giscus) on it.
+2. Go to https://giscus.app/, enter `aislopwatch/web`, mapping **pathname**, and
+   copy the `repoId` and `categoryId`.
+3. Paste those into the `comments` block in `src/_data/site.js`.
 
 ## License
 

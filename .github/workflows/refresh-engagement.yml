@@ -27,9 +27,6 @@ jobs:
           script: |
             const fs = require("fs");
             const { owner, repo } = context.repo;
-            // giscus comments live in a SEPARATE public repo (so the code repo
-            // can stay private). Discussions are read from there.
-            const [discOwner, discRepo] = "aislopwatch/aislopwatch-comments".split("/");
 
             // 1) Every published submission (these became posts).
             const issues = await github.paginate(github.rest.issues.listForRepo, {
@@ -39,8 +36,6 @@ jobs:
             // 2) giscus discussions (data-mapping="pathname" => title is the
             //    post pathname, e.g. "/posts/001-hello-world/"). Best-effort:
             //    if Discussions are off or the query fails, counts stay 0.
-            //    Reading another public repo's discussions may need a PAT with
-            //    read access if the default token is rejected.
             const disc = {};
             try {
               let after = null;
@@ -54,7 +49,7 @@ jobs:
                        }
                      }
                    }`,
-                  { owner: discOwner, repo: discRepo, after }
+                  { owner, repo, after }
                 );
                 const d = q.repository.discussions;
                 for (const n of d.nodes) {
