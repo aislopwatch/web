@@ -1,0 +1,20 @@
+---
+pagination:
+  data: collections.tagList
+  size: 1
+  alias: tag
+layout: base.njk
+eleventyComputed:
+  title: "Tagged #{{ tag }}"
+  description: "All AISlopWatch posts tagged #{{ tag }}."
+permalink: "/tags/{{ tag | slugify }}/"
+---
+<a class="back mono" href="{{ '/' | url }}">← all posts</a>
+
+<h1 class="tagpage-title">Tagged <span class="tag">#{{ tag }}</span></h1>
+
+{% set activeTag = tag %}
+{% include "taglist.njk" %}
+
+{% set postlist = collections[tag] | reverse %}
+{% include "postlist.njk" %}

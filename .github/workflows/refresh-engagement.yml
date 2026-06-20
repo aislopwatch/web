@@ -1,0 +1,137 @@
+name: Refresh engagement (Hall of Shame)
+
+# Build-time popularity, no visitor tracking. Reads each published submission's
+# 👍 reactions and its giscus discussion's comment/reaction counts from the
+# GitHub API, writes them to src/_data/engagement.json, and pushes — which
+# retriggers the Pages deploy so the Hall of Shame stays fresh.
+
+on:
+  schedule:
+    - cron: "37 */6 * * *" # every 6 hours, offset from the publish workflow
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: read
+  discussions: read
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Gather engagement from issues + discussions
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const { owner, repo } = context.repo;
+            // giscus comments live in a SEPARATE public repo (so the code repo
+            // can stay private). Discussions are read from there.
+            const [discOwner, discRepo] = "aislopwatch/aislopwatch-comments".split("/");
+
+            // 1) Every published submission (these became posts).
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner, repo, state: "all", labels: "published", per_page: 100,
+            });
+
+            // 2) giscus discussions (data-mapping="pathname" => title is the
+            //    post pathname, e.g. "/posts/001-hello-world/"). Best-effort:
+            //    if Discussions are off or the query fails, counts stay 0.
+            //    Reading another public repo's discussions may need a PAT with
+            //    read access if the default token is rejected.
+            const disc = {};
+            try {
+              let after = null;
+              for (let i = 0; i < 20; i++) {
+                const q = await github.graphql(
+                  `query($owner:String!,$repo:String!,$after:String){
+                     repository(owner:$owner,name:$repo){
+                       discussions(first:100, after:$after){
+                         pageInfo{ hasNextPage endCursor }
+                         nodes{ title comments{ totalCount } reactions{ totalCount } }
+                       }
+                     }
+                   }`,
+                  { owner: discOwner, repo: discRepo, after }
+                );
+                const d = q.repository.discussions;
+                for (const n of d.nodes) {
+                  disc[n.title] = {
+                    comments: n.comments.totalCount,
+                    reactions: n.reactions.totalCount,
+                  };
+                }
+                if (!d.pageInfo.hasNextPage) break;
+                after = d.pageInfo.endCursor;
+              }
+            } catch (e) {
+              core.warning("Discussions unavailable, comments default to 0: " + e.message);
+            }
+
+            const posts = [];
+            for (const issue of issues) {
+              // Find the slug from the "✅ Published! → .../posts/<slug>/" comment.
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                owner, repo, issue_number: issue.number, per_page: 100,
+              });
+              let slug = null;
+              for (const c of comments) {
+                const m = (c.body || "").match(/\/posts\/([a-z0-9-]+)\//i);
+                if (m) { slug = m[1]; break; }
+              }
+              if (!slug) continue;
+
+              const up = (issue.reactions && issue.reactions["+1"]) || 0;
+              const path = "/posts/" + slug + "/";
+              const dd = disc[path] || { comments: 0, reactions: 0 };
+              const score = up + 2 * dd.comments + dd.reactions;
+              const title = (issue.title || "").replace(/^\[sighting\]\s*/i, "").trim();
+              posts.push({
+                slug,
+                title,
+                up,
+                comments: dd.comments,
+                reactions: dd.reactions,
+                score,
+              });
+            }
+
+            posts.sort((a, b) => b.score - a.score || a.slug.localeCompare(b.slug));
+            const out = { updated: new Date().toISOString(), posts };
+            fs.writeFileSync("src/_data/engagement.json", JSON.stringify(out, null, 2) + "\n");
+            core.info("Wrote engagement for " + posts.length + " post(s).");
+
+            // Open submissions, for the on-site /pending/ "On the Desk" board.
+            const open = await github.paginate(github.rest.issues.listForRepo, {
+              owner, repo, state: "open", labels: "submission", per_page: 100,
+            });
+            const items = open
+              .filter((i) => !i.pull_request)
+              .map((i) => ({
+                number: i.number,
+                title: (i.title || "").replace(/^\[sighting\]\s*/i, "").trim(),
+                url: i.html_url,
+                up: (i.reactions && i.reactions["+1"]) || 0,
+                down: (i.reactions && i.reactions["-1"]) || 0,
+              }))
+              .sort((a, b) => b.up - a.up);
+            fs.writeFileSync(
+              "src/_data/pending.json",
+              JSON.stringify({ updated: new Date().toISOString(), items }, null, 2) + "\n"
+            );
+            core.info("Wrote " + items.length + " pending submission(s).");
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- src/_data/engagement.json src/_data/pending.json; then
+            echo "No engagement/pending changes."
+            exit 0
+          fi
+          git add src/_data/engagement.json src/_data/pending.json
+          git commit -m "data: refresh Hall of Shame + pending submissions"
+          git pull --rebase origin main
+          git push

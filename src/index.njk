@@ -1,0 +1,64 @@
+---
+layout: base.njk
+---
+<h1 class="visually-hidden">AISlopWatch — AI slop and hype, screenshotted, labeled, and blamed</h1>
+<section class="intro prose">
+  <p>
+    <strong>AI is fine. What people do with it often isn't.</strong> Two kinds of
+    cringe, screenshotted: <strong>slop</strong> — low-effort machine filler nobody
+    bothered to read back — and <strong>hype</strong> — humans swearing a chatbot
+    loves them and made them rich. We name names. <a href="{{ '/about/' | url }}">More →</a>
+  </p>
+</section>
+
+<section class="legend" aria-label="What the verdicts mean">
+  <span class="legend-label mono">the two crimes</span>
+  <ul class="legend-list">
+    {%- for key, cat in categories %}{% if key == "slop" or key == "hype" %}
+    <li>
+      <a class="badge badge-stamp" data-cat="{{ key }}" href="{{ ('/tags/' ~ key ~ '/') | url }}">{{ cat.label }}</a>
+      <span class="legend-blurb">{{ cat.blurb }}</span>
+    </li>
+    {%- endif %}{% endfor %}
+  </ul>
+</section>
+
+{% set board = collections.posts | rankByEngagement(engagement) %}
+{%- if board.length %}
+<section class="shame">
+  <div class="shame-head mono">
+    <span>// hall of shame</span>
+    <a href="{{ '/trending/' | url }}">full board →</a>
+  </div>
+  <ol class="shame-list" data-board>
+    {%- for row in board %}{% if loop.index <= 3 %}
+    <li class="shame-item" data-slug="{{ row.post.fileSlug }}">
+      <a class="shame-link" href="{{ row.post.url | url }}">
+        <span class="shame-rank mono">{{ loop.index }}</span>
+        <span class="shame-title">{{ row.post.data.title }}</span>
+        <span class="shame-score mono">🔨 <span class="live-votes">{{ row.up }}</span> · 👁 <span class="live-views">0</span></span>
+      </a>
+    </li>
+    {%- endif %}{% endfor %}
+  </ol>
+</section>
+{%- endif %}
+
+{%- if collections.posts.length %}
+{% include "taglist.njk" %}
+
+<div class="sortbar mono" data-sort hidden>
+  <span class="sortbar-label">sort</span>
+  <button type="button" data-sort-by="newest" class="is-active" aria-pressed="true">newest</button>
+  <button type="button" data-sort-by="blamed" aria-pressed="false">most blamed</button>
+  <button type="button" data-sort-by="viewed" aria-pressed="false">most viewed</button>
+</div>
+
+{% set postlist = collections.posts | reverse %}
+{% include "postlist.njk" %}
+{%- else %}
+<p class="prose empty-state">
+  No sightings logged yet. The internet is extruding slop as you read this —
+  <a href="https://github.com/{{ site.repo }}/issues/new?template=slop-sighting.yml" rel="noopener">bring the first receipts →</a>
+</p>
+{%- endif %}

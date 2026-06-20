@@ -1,0 +1,141 @@
+name: Publish from voted issues
+
+# Submissions arrive as issues (label: submission). People vote with 👍 / 👎.
+# An issue is published when it reaches VOTE_THRESHOLD 👍 (more 👍 than 👎) OR the
+# editor adds `approved`. `rejected` closes it without publishing. New posts are
+# committed to main; the push triggers Cloudflare Pages to rebuild + deploy.
+
+on:
+  schedule:
+    - cron: "17 */6 * * *" # every 6 hours
+  workflow_dispatch:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+env:
+  VOTE_THRESHOLD: "10" # 👍 needed to auto-publish (editor `approved` label always wins)
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ensure labels exist
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const wanted = [
+              { name: "submission", color: "0e8a16", description: "A post suggestion, open for voting" },
+              { name: "approved", color: "1d76db", description: "Editor approved — will be published" },
+              { name: "rejected", color: "b60205", description: "Declined — will be closed unpublished" },
+              { name: "published", color: "5319e7", description: "Turned into a post" },
+            ];
+            for (const l of wanted) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: l.name });
+              } catch (e) {
+                if (e.status === 404) {
+                  await github.rest.issues.createLabel({ owner, repo, name: l.name, color: l.color, description: l.description });
+                  core.info("created label " + l.name);
+                } else {
+                  throw e;
+                }
+              }
+            }
+
+      - name: Select & generate posts from eligible issues
+        id: gather
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const path = require("path");
+            const { buildPost } = require(path.resolve("tools/issue-to-post.cjs"));
+            const THRESHOLD = parseInt(process.env.VOTE_THRESHOLD || "10", 10);
+            const { owner, repo } = context.repo;
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner, repo, state: "open", per_page: 100,
+            });
+            let maxId = 0;
+            for (const d of fs.readdirSync("src/posts", { withFileTypes: true })) {
+              if (!d.isDirectory()) continue;
+              const m = d.name.match(/^(\d+)-/);
+              if (m) maxId = Math.max(maxId, parseInt(m[1], 10));
+            }
+            let nextId = maxId + 1;
+            const date = new Date().toISOString().slice(0, 10);
+            const published = [], rejected = [];
+            for (const issue of issues) {
+              if (issue.pull_request) continue;
+              const labels = issue.labels.map((l) => (typeof l === "string" ? l : l.name));
+              if (labels.includes("published")) continue;
+              if (labels.includes("rejected")) { rejected.push({ number: issue.number }); continue; }
+              const up = (issue.reactions && issue.reactions["+1"]) || 0;
+              const down = (issue.reactions && issue.reactions["-1"]) || 0;
+              const approved = labels.includes("approved");
+              const submission = labels.includes("submission");
+              // Editor approval always publishes; community votes require the
+              // submission label and clearing the threshold.
+              if (!(approved || (submission && up >= THRESHOLD && up > down))) continue;
+              const id = nextId++;
+              const post = buildPost({ issue, id, approved, up, date });
+              fs.mkdirSync(post.dir, { recursive: true });
+              fs.writeFileSync(post.filename, post.content);
+              // Self-host submitted screenshots so they can't expire or change.
+              for (const img of post.images || []) {
+                try {
+                  const r = await fetch(img.url);
+                  if (!r.ok) { core.warning("image " + r.status + ": " + img.url); continue; }
+                  const dest = path.join(post.dir, img.file);
+                  fs.mkdirSync(path.dirname(dest), { recursive: true });
+                  fs.writeFileSync(dest, Buffer.from(await r.arrayBuffer()));
+                } catch (e) { core.warning("image download failed: " + img.url); }
+              }
+              published.push({ number: issue.number, slug: post.slug, up });
+              core.info(`#${issue.number} -> ${post.slug}`);
+            }
+            core.setOutput("published", JSON.stringify(published));
+            core.setOutput("rejected", JSON.stringify(rejected));
+            core.setOutput("count", String(published.length));
+
+      - name: Commit new posts (Cloudflare Pages rebuilds on push)
+        if: steps.gather.outputs.count != '0'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/posts
+          git commit -m "post: publish ${{ steps.gather.outputs.count }} community submission(s)"
+          git pull --rebase origin main
+          git push
+
+      - name: Close & label processed issues
+        if: steps.gather.outputs.count != '0' || steps.gather.outputs.rejected != '[]'
+        uses: actions/github-script@v7
+        env:
+          PUBLISHED: ${{ steps.gather.outputs.published }}
+          REJECTED: ${{ steps.gather.outputs.rejected }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const base = "https://aislopwatch.com";
+            for (const p of JSON.parse(process.env.PUBLISHED || "[]")) {
+              await github.rest.issues.createComment({ owner, repo, issue_number: p.number,
+                body: `✅ Published! → ${base}/posts/${p.slug}/\n\nThanks for the sighting.` });
+              await github.rest.issues.addLabels({ owner, repo, issue_number: p.number, labels: ["published"] });
+              await github.rest.issues.update({ owner, repo, issue_number: p.number, state: "closed" });
+            }
+            for (const r of JSON.parse(process.env.REJECTED || "[]")) {
+              await github.rest.issues.createComment({ owner, repo, issue_number: r.number,
+                body: "Closing this submission — not a fit for now. Thanks anyway!" });
+              await github.rest.issues.update({ owner, repo, issue_number: r.number, state: "closed", state_reason: "not_planned" });
+            }

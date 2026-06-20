@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Apply a saved theme choice before first paint to avoid a flash. -->
+    <script>
+      try {
+        var t = localStorage.getItem("theme");
+        if (t === "dark" || t === "light")
+          document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+    <meta name="theme-color" content="#f2eee3" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#15130e" media="(prefers-color-scheme: dark)" />
+
+    <title>
+      {%- if title and title != site.title -%}
+        {{ title }} · {{ site.title }}
+      {%- else -%}
+        {{ site.title }} · {{ site.tagline }}
+      {%- endif -%}
+    </title>
+    <meta name="description" content="{{ description or site.description }}" />
+    {%- if robots %}<meta name="robots" content="{{ robots }}" />{% endif %}
+    <link rel="canonical" href="{{ site.url }}{{ page.url | url }}" />
+    <link rel="icon" href="{{ '/favicon.svg' | url }}" />
+    <link rel="apple-touch-icon" href="{{ '/apple-touch-icon.png' | url }}" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="{{ site.title }}"
+      href="{{ '/feed.xml' | url }}"
+    />
+
+    <!-- System fonts only. No webfont requests, no third party, no trackers. -->
+    <link rel="stylesheet" href="{{ '/css/style.css' | url }}?v=2" />
+
+    <meta property="og:title" content="{{ title or site.title }}" />
+    <meta property="og:description" content="{{ description or site.description }}" />
+    <meta property="og:type" content="{{ ogType or 'website' }}" />
+    <meta property="og:url" content="{{ site.url }}{{ page.url | url }}" />
+    <meta property="og:image" content="{{ site.url }}{{ '/og.png' | url }}" />
+    <meta property="og:site_name" content="{{ site.title }}" />
+    {%- if ogType == "article" %}
+    <meta property="article:published_time" content="{{ page.date | htmlDateString }}" />
+    <meta property="article:author" content="{{ site.author.name }}" />
+    {%- for t in tags %}{% if t != "posts" %}
+    <meta property="article:tag" content="{{ t }}" />
+    {%- endif %}{% endfor %}
+    {%- endif %}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="{{ title or site.title }}" />
+    <meta name="twitter:description" content="{{ description or site.description }}" />
+    <meta name="twitter:image" content="{{ site.url }}{{ '/og.png' | url }}" />
+    <meta name="twitter:image:alt" content="{{ site.title }} — {{ site.tagline }}" />
+
+    {#- Structured data: BlogPosting + breadcrumb on posts, WebSite on home. -#}
+    {%- if ogType == "article" %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": {{ title | dump | safe }},
+      "datePublished": "{{ page.date | htmlDateString }}",
+      "dateModified": "{{ page.date | htmlDateString }}",
+      "description": {{ (description or site.description) | dump | safe }},
+      "image": { "@type": "ImageObject", "url": "{{ site.url }}{{ '/og.png' | url }}", "width": 1200, "height": 630 },
+      "url": "{{ site.url }}{{ page.url | url }}",
+      "mainEntityOfPage": "{{ site.url }}{{ page.url | url }}",
+      "author": { "@type": "Organization", "name": {{ site.author.name | dump | safe }} },
+      "publisher": {
+        "@type": "Organization",
+        "name": {{ site.title | dump | safe }},
+        "logo": { "@type": "ImageObject", "url": "{{ site.url }}{{ '/apple-touch-icon.png' | url }}" }
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site.url }}{{ '/' | url }}" },
+        { "@type": "ListItem", "position": 2, "name": {{ title | dump | safe }}, "item": "{{ site.url }}{{ page.url | url }}" }
+      ]
+    }
+    </script>
+    {%- elif page.url == "/" %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": {{ site.title | dump | safe }},
+      "url": "{{ site.url }}{{ '/' | url }}",
+      "description": {{ site.description | dump | safe }}
+    }
+    </script>
+    {%- endif %}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="masthead">
+      <button class="theme-toggle" type="button" aria-label="Toggle dark mode" hidden></button>
+      <a class="brand" href="{{ '/' | url }}">
+        <span class="brand-name">{{ site.title }}</span
+        ><span class="cursor" aria-hidden="true">█</span>
+      </a>
+      <p class="tagline">{{ site.tagline }}</p>
+    </header>
+
+    <nav class="navbar mono" aria-label="Primary">
+      <div class="navbar-inner">
+        <a href="{{ '/' | url }}">index</a>
+        <a href="{{ '/trending/' | url }}">shame</a>
+        <a href="{{ '/search/' | url }}">search</a>
+        <a class="nav-icon" data-random data-src="{{ '/posts.json' | url }}" href="{{ '/' | url }}" aria-label="Random sighting" title="Random sighting" hidden>{% include "icon-dice.njk" %}</a>
+        <a class="nav-cta" href="https://github.com/{{ site.repo }}/issues/new?template=slop-sighting.yml" rel="noopener">submit a sighting</a>
+      </div>
+    </nav>
+
+    <main id="main" class="wrap">{{ content | safe }}</main>
+
+    <footer class="site-footer mono">
+      <nav class="footer-links" aria-label="Secondary">
+        <a href="{{ '/about/' | url }}">about</a>
+        <a href="{{ '/pending/' | url }}">the desk</a>
+        <a class="footer-icon" data-random data-src="{{ '/posts.json' | url }}" href="{{ '/' | url }}" aria-label="Random sighting" title="Random sighting" hidden>{% include "icon-dice.njk" %}</a>
+        <a href="{{ '/feed.xml' | url }}">rss</a>
+      </nav>
+      <div class="footer-meta">
+        <span>{{ collections.posts | length }} slops catalogued</span>
+        <span class="muted" data-blame-tally hidden></span>
+        <span>© {% year %} {{ site.author.name }}</span>
+        <span>no trackers, no slop</span>
+      </div>
+    </footer>
+
+    <!-- Theme toggle + giscus sync. No-op without JS; OS preference still applies. -->
+    <script>
+      (function () {
+        var root = document.documentElement;
+        var mq = window.matchMedia("(prefers-color-scheme: dark)");
+        function current() {
+          return root.dataset.theme || (mq.matches ? "dark" : "light");
+        }
+
+        // Keep the giscus comment box in sync with the actual site theme
+        // (including the manual toggle, which the OS preference can't see).
+        function syncGiscus() {
+          var f = document.querySelector("iframe.giscus-frame");
+          if (!f || !f.contentWindow) return;
+          f.contentWindow.postMessage(
+            { giscus: { setConfig: { theme: current() } } },
+            "https://giscus.app"
+          );
+        }
+        window.addEventListener("message", function (e) {
+          if (e.origin === "https://giscus.app") syncGiscus();
+        });
+
+        var btn = document.querySelector(".theme-toggle");
+        function render() {
+          if (!btn) return;
+          var c = current();
+          btn.innerHTML =
+            (c === "dark" ? "☀" : "☾") +
+            '<span class="tt-label">' + (c === "dark" ? " light" : " dark") + "</span>";
+          btn.setAttribute("aria-pressed", c === "dark" ? "true" : "false");
+        }
+        if (btn) {
+          btn.hidden = false;
+          render();
+          btn.addEventListener("click", function () {
+            var next = current() === "dark" ? "light" : "dark";
+            root.dataset.theme = next;
+            try {
+              localStorage.setItem("theme", next);
+            } catch (e) {}
+            render();
+            syncGiscus();
+          });
+        }
+        mq.addEventListener("change", function () {
+          render();
+          syncGiscus();
+        });
+      })();
+    </script>
+    <script src="{{ '/enhance.js' | url }}" defer></script>
+    <script src="{{ '/easteregg.js' | url }}" defer></script>
+  </body>
+</html>

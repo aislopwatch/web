@@ -1,0 +1,90 @@
+---
+layout: base.njk
+---
+{#- collections.posts is oldest→newest. getNext = newer, getPrevious = older. -#}
+{%- set newerPost = collections.posts | getNextCollectionItem -%}
+{%- set olderPost = collections.posts | getPreviousCollectionItem -%}
+{%- if newerPost or olderPost %}
+<nav class="postnav mono" aria-label="Post navigation">
+  {%- if newerPost %}
+  <a href="{{ newerPost.url | url }}"><span class="postnav-dir">← newer</span><span class="postnav-title">{{ newerPost.data.title }}</span></a>
+  {%- endif %}
+  {%- if olderPost %}
+  <a href="{{ olderPost.url | url }}"><span class="postnav-dir">older →</span><span class="postnav-title">{{ olderPost.data.title }}</span></a>
+  {%- endif %}
+</nav>
+{%- endif %}
+
+{%- set primary = tags | primaryCategory -%}
+{%- set cat = categories[primary] -%}
+<article class="post" data-slug="{{ page.fileSlug }}">
+  <header class="post-head casefile">
+    <div class="casefile-strip mono">
+      <span class="casefile-no">CASE №{{ id | pad }}</span>
+      <span class="casefile-sep" aria-hidden="true">·</span>
+      <span>FILED <time datetime="{{ page.date | htmlDateString }}">{{ page.date | htmlDateString }}</time></span>
+      <span class="casefile-sep" aria-hidden="true">·</span>
+      <span>THE SLOP DESK</span>
+      {%- if cat %}<span class="stamp{% if cat.stamp %} stamp-red{% endif %}" data-cat="{{ primary }}">{{ cat.label }}</span>{% endif %}
+    </div>
+    <h1 class="post-title">{{ title }}</h1>
+    {% if description %}<p class="post-dek">{{ description }}</p>{% endif %}
+    {%- if tags %}
+    <div class="casefile-class mono">
+      <span class="casefile-class-label">classification</span>
+      {%- for t in tags -%}{% if t != "posts" %} <a class="tag" href="{{ ('/tags/' ~ (t | slugify) ~ '/') | url }}">{{ t }}</a>{% endif -%}{%- endfor -%}
+    </div>
+    {%- endif %}
+  </header>
+
+  <div class="prose">{{ content | safe }}</div>
+
+  {#- Live blame counter (Cloudflare D1). Static-safe: shows "—" without JS/API. -#}
+  <div class="blame">
+    <button class="blame-btn" type="button" aria-label="Blame this slop — cast one public vote">🔨 blame this slop</button>
+    <button class="blame-undo mono" type="button" hidden>undo</button>
+    <span class="blame-stats mono" role="status" aria-live="polite">
+      <span class="blame-votes">—</span> blames
+      <span class="blame-dot" aria-hidden="true">·</span>
+      <span class="blame-views">—</span> views
+    </span>
+    <span class="blame-note mono">one blame per browser · a public vote, not a report</span>
+  </div>
+
+  {%- set shareUrl = site.url ~ (page.url | url) %}
+  {%- set shareText = "Blaming this slop: " ~ title %}
+  <div class="share mono" aria-label="Share this sighting">
+    <span class="share-label">blame it elsewhere</span>
+    <a href="https://bsky.app/intent/compose?text={{ (shareText ~ ' ' ~ shareUrl) | urlencode }}" target="_blank" rel="noopener">bluesky</a>
+    <a href="https://mastodon.social/share?text={{ (shareText ~ ' ' ~ shareUrl) | urlencode }}" target="_blank" rel="noopener">mastodon</a>
+    <a href="https://twitter.com/intent/tweet?text={{ shareText | urlencode }}&amp;url={{ shareUrl | urlencode }}" target="_blank" rel="noopener">x</a>
+    <button class="share-copy" type="button" data-url="{{ shareUrl }}">copy link</button>
+  </div>
+
+  <p class="post-cta mono">
+    Caught one like this?
+    <a href="https://github.com/{{ site.repo }}/issues/new?template=slop-sighting.yml" rel="noopener">Submit a sighting →</a>
+  </p>
+
+  {%- if newerPost or olderPost %}
+  <nav class="postnav-bottom mono" aria-label="Post navigation">
+    {%- if newerPost %}<a class="pn-prev" href="{{ newerPost.url | url }}"><span class="postnav-dir">← newer</span>{{ newerPost.data.title }}</a>{% endif %}
+    {%- if olderPost %}<a class="pn-next" href="{{ olderPost.url | url }}"><span class="postnav-dir">older →</span>{{ olderPost.data.title }}</a>{% endif %}
+  </nav>
+  {%- endif %}
+
+  {%- if primary %}{% set related = collections[primary] | relatedPosts(page.url, 3) %}{% endif %}
+  {%- if related and related.length %}
+  <section class="related">
+    <h2 class="related-head mono">// more {{ primary }}</h2>
+    <ul class="related-list">
+      {%- for p in related %}
+      <li><a href="{{ p.url | url }}">{{ p.data.title }}</a></li>
+      {%- endfor %}
+    </ul>
+  </section>
+  {%- endif %}
+
+  {# Comments show when globally enabled, unless a post sets `comments: false`. #}
+  {% if site.comments.enabled and comments != false %}{% include "comments.njk" %}{% endif %}
+</article>

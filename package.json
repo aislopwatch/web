@@ -1,0 +1,31 @@
+{
+  "name": "aislopwatch",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A nerdy blog for blaming AI slop.",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "eleventy --serve --quiet",
+    "dev": "eleventy --serve",
+    "build": "eleventy && pagefind --site public",
+    "build:fast": "eleventy",
+    "clean": "rm -rf public",
+    "cf:dev": "npm run build && wrangler pages dev ./public",
+    "cf:migrate": "wrangler d1 migrations apply aislopwatch-engagement --remote",
+    "cf:migrate:local": "wrangler d1 migrations apply aislopwatch-engagement --local",
+    "cf:deploy": "npm run build && wrangler pages deploy ./public"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.0.0",
+    "@11ty/eleventy-plugin-syntaxhighlight": "^5.0.0",
+    "markdown-it-footnote": "^4.0.0",
+    "markdown-it-task-lists": "^2.1.1",
+    "wrangler": "^4.0.0"
+  },
+  "dependencies": {
+    "pagefind": "^1.5.2"
+  }
+}

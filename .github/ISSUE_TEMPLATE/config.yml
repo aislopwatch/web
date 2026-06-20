@@ -1,0 +1,3 @@
+# Every issue goes through the sighting form, so each one enters the
+# vote-to-publish pipeline with the `submission` label.
+blank_issues_enabled: false

@@ -1,0 +1,31 @@
+name: Slop sighting
+description: Suggest a post — caught some AI slop or AI hype in the wild?
+title: "[sighting] "
+labels: [submission]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Found some slop? Submit it here. Everyone votes with 👍 / 👎 — sightings
+        that clear the bar (or get the editor's nod) get published as posts.
+        Keep the title short; it becomes the post title.
+  - type: textarea
+    id: sighting
+    attributes:
+      label: The sighting
+      description: What is it, why is it slop or hype, and who's to blame? Paste a screenshot straight into this box.
+      placeholder: "Drag a screenshot here, then write a few lines. A source link helps."
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - Slop (machine-written)
+        - Hype (a human posting about AI)
+        - Guide
+        - Tell
+        - Meta
+    validations:
+      required: true

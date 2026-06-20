@@ -1,0 +1,19 @@
+---
+layout: base.njk
+permalink: /404.html
+eleventyExcludeFromCollections: true
+title: 404
+robots: noindex
+---
+<section class="prose error404">
+  <h1>404 · signal lost</h1>
+  <p>
+    This page is slop. It does not exist, or it was removed for being slop.
+    Either way, nothing of value was lost.
+  </p>
+  <p class="error404-exits mono">
+    <a href="{{ '/' | url }}">← the index</a>
+    <a href="{{ '/trending/' | url }}">hall of shame</a>
+    <a href="https://github.com/{{ site.repo }}/issues/new?template=slop-sighting.yml" rel="noopener">submit a sighting</a>
+  </p>
+</section>

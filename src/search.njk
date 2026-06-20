@@ -1,0 +1,27 @@
+---
+layout: base.njk
+permalink: /search/
+title: Search
+description: Search the AISlopWatch case files.
+robots: noindex, follow
+---
+<a class="back mono" href="{{ '/' | url }}">← all posts</a>
+
+<h1 class="tagpage-title">Search the <span class="tag">files</span></h1>
+
+<link rel="stylesheet" href="{{ '/pagefind/pagefind-ui.css' | url }}" />
+<div id="search" class="pf"></div>
+<noscript><p class="prose">Search needs JavaScript. Browse by <a href="{{ '/' | url }}">tag</a> instead.</p></noscript>
+<script src="{{ '/pagefind/pagefind-ui.js' | url }}"></script>
+<script>
+  window.addEventListener("DOMContentLoaded", function () {
+    if (window.PagefindUI) {
+      new PagefindUI({
+        element: "#search",
+        bundlePath: "{{ '/pagefind/' | url }}",
+        showSubResults: true,
+        showImages: false,
+      });
+    }
+  });
+</script>

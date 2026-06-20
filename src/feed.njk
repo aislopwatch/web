@@ -1,0 +1,34 @@
+---
+permalink: /feed.xml
+eleventyExcludeFromCollections: true
+---
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>{{ site.title }}</title>
+    <link>{{ site.url }}{{ '/' | url }}</link>
+    <atom:link href="{{ site.url }}{{ '/feed.xml' | url }}" rel="self" type="application/rss+xml"/>
+    <description>{{ site.description }}</description>
+    <language>en</language>
+    {%- if collections.posts.length %}
+    {%- set newest = collections.posts | last %}
+    <lastBuildDate>{{ newest.date | rssDate }}</lastBuildDate>
+    {%- endif %}
+    {%- for post in collections.posts | reverse %}
+    <item>
+      <title>{{ post.data.title }}</title>
+      <link>{{ site.url }}{{ post.url | url }}</link>
+      <guid isPermaLink="true">{{ site.url }}{{ post.url | url }}</guid>
+      <pubDate>{{ post.date | rssDate }}</pubDate>
+      <dc:creator>{{ site.author.name }}</dc:creator>
+      {%- for t in post.data.tags %}{% if t != "posts" %}
+      <category>{{ t }}</category>
+      {%- endif %}{% endfor %}
+      {%- if post.data.description %}
+      <description>{{ post.data.description }}</description>
+      {%- endif %}
+      <content:encoded><![CDATA[{{ post.templateContent | safe }}]]></content:encoded>
+    </item>
+    {%- endfor %}
+  </channel>
+</rss>

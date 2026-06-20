@@ -1,0 +1,28 @@
+{#- Renders a post list from a `postlist` variable (array of posts). -#}
+<ol class="postlist" reversed>
+  {%- for post in postlist -%}
+  {%- set primary = post.data.tags | primaryCategory -%}
+  {%- set cat = categories[primary] -%}
+  <li class="postlist-item" data-tags="{{ post.data.tags | join(' ') }}" data-slug="{{ post.fileSlug }}" data-published="{{ post.date | htmlDateString }}">
+    <a class="postlist-link" href="{{ post.url | url }}">
+      <span class="postlist-index mono">{{ post.data.id | pad }}</span>
+      <span class="postlist-body">
+        <span class="postlist-date mono">
+          {{ post.date | readableDate }}
+          {%- if cat %} <span class="badge{% if cat.stamp %} badge-stamp{% endif %}" data-cat="{{ primary }}">{{ cat.label }}</span>{% endif %}
+        </span>
+        <span class="postlist-title">{{ post.data.title }}</span>
+        {%- if post.data.description %}
+        <span class="postlist-dek">{{ post.data.description }}</span>
+        {%- endif %}
+        {%- if post.data.tags.length > 1 %}
+        <span class="postlist-tags mono">
+          {%- for t in post.data.tags %}{% if t != "posts" %}<span class="tag">#{{ t }}</span> {% endif %}{% endfor -%}
+        </span>
+        {%- endif %}
+      </span>
+      <span class="postlist-arrow mono" aria-hidden="true">→</span>
+    </a>
+  </li>
+  {%- endfor -%}
+</ol>

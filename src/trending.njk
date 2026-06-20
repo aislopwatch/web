@@ -1,0 +1,39 @@
+---
+layout: base.njk
+permalink: /trending/
+title: Hall of Shame
+description: The most-blamed AI slop on AISlopWatch, ranked live by reader blames and views.
+robots: noindex, follow
+---
+<a class="back mono" href="{{ '/' | url }}">← all posts</a>
+
+<h1 class="tagpage-title">Hall of <span class="tag">Shame</span></h1>
+
+<p class="intro prose">
+  The most-blamed sightings, ranked live by your blames and views. Counts are
+  <em>aggregate and cookieless</em> — we tally the slop, not the visitor.
+</p>
+
+{% set board = collections.posts | rankByEngagement(engagement) %}
+{%- if board.length %}
+<div class="board-slab mono">MOST BLAMED <span>// updated live · cookieless</span></div>
+<ol class="board" data-board>
+  {%- for row in board %}
+  <li class="board-row" data-slug="{{ row.post.fileSlug }}">
+    <a class="board-link" href="{{ row.post.url | url }}">
+      <span class="board-rank mono">{{ loop.index | pad }}</span>
+      <span class="board-body">
+        <span class="board-title">{{ row.post.data.title }}</span>
+        <span class="board-stats mono">
+          <span class="board-stat board-score">🔨 <span class="live-votes">{{ row.up }}</span> blames</span>
+          <span class="board-stat">👁 <span class="live-views">0</span> views</span>
+        </span>
+      </span>
+      <span class="board-arrow mono" aria-hidden="true">→</span>
+    </a>
+  </li>
+  {%- endfor %}
+</ol>
+{%- else %}
+<p class="prose">No sightings logged yet. Bring receipts.</p>
+{%- endif %}
