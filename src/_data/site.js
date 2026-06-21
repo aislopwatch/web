@@ -14,6 +14,10 @@ export default {
   // pipeline, and giscus comments (Discussions). Public, but anonymous.
   repo: "aislopwatch/web",
 
+  // Private contact for corrections / takedown requests. Set up as a Cloudflare
+  // Email Routing alias that forwards to your inbox (keeps it off your name).
+  contact: "removals@aislopwatch.com",
+
   author: {
     name: "The Slop Desk",
     email: "",

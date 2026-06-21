@@ -1288,6 +1288,14 @@ a.tag:hover {
   text-decoration: none;
   font-weight: 600;
 }
+.post-report {
+  margin-top: 0.5rem;
+  font-size: 0.74rem;
+  color: var(--ink-muted);
+}
+.post-report a {
+  color: var(--ink-soft);
+}
 
 /* ---- Live blame counter (Cloudflare D1) --------------------------------- */
 

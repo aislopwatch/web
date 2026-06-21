@@ -65,6 +65,10 @@ layout: base.njk
     Caught one like this?
     <a href="https://github.com/{{ site.repo }}/issues/new?template=slop-sighting.yml" rel="noopener">Submit a sighting →</a>
   </p>
+  <p class="post-report mono">
+    See a problem — that's you, a mistake, private info, or copyright?
+    <a href="{{ '/rules/' | url }}#removal">Report or request removal →</a>
+  </p>
 
   {%- if newerPost or olderPost %}
   <nav class="postnav-bottom mono" aria-label="Post navigation">
