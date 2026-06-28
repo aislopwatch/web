@@ -4,7 +4,7 @@
   // (view counts + "blame" votes) under /api/*. The Worker entry routes /api/*
   // to worker/api/* and hands everything else to the ASSETS binding.
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "aislopwatch",
+  "name": "web",
   "main": "worker/index.js",
   "compatibility_date": "2025-06-01",
 
