@@ -1,0 +1,5 @@
+---
+permalink: /posts.json
+eleventyExcludeFromCollections: true
+---
+[{% for post in collections.posts %}{% if not loop.first %},{% endif %}{"url":{{ (post.url | url) | dump | safe }},"title":{{ post.data.title | dump | safe }}}{% endfor %}]

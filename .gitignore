@@ -1,0 +1,12 @@
+node_modules/
+public/
+.cache/
+.DS_Store
+*.log
+
+# Local-only notes / runbooks / scratch. Never committed.
+.local/
+
+# Cloudflare / wrangler
+.wrangler/
+.dev.vars

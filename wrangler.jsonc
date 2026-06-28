@@ -1,0 +1,32 @@
+{
+  // Cloudflare Worker for AISlopWatch: serves the static site (Eleventy output
+  // in public/) via Workers Static Assets, and runs the live engagement API
+  // (view counts + "blame" votes) under /api/*. The Worker entry routes /api/*
+  // to worker/api/* and hands everything else to the ASSETS binding.
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // Worker name must match the Cloudflare Workers Build (created from the repo
+  // name aislopwatch/web). The public site is served at aislopwatch.com via a
+  // custom domain; this internal name only affects the *.workers.dev URL + CLI.
+  "name": "web",
+  "main": "worker/index.js",
+  "compatibility_date": "2025-06-01",
+
+  // Static site. Assets matching a request are served directly (the Worker only
+  // runs for /api/* and unmatched paths). 404s fall back to public/404.html.
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page"
+  },
+
+  // Live engagement store. Created with:
+  //   npx wrangler d1 create aislopwatch-engagement
+  // schema in migrations/ (apply with npm run cf:migrate[:local]).
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "aislopwatch-engagement",
+      "database_id": "c252cda0-9e4b-4050-9f50-cc65344b919a"
+    }
+  ]
+}

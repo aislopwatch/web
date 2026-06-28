@@ -1,0 +1,40 @@
+---
+layout: base.njk
+permalink: /pending/
+title: On the Desk
+description: Pending slop sightings awaiting community votes.
+robots: noindex, follow
+---
+<a class="back mono" href="{{ '/' | url }}">← all posts</a>
+
+<h1 class="tagpage-title">On the <span class="tag">Desk</span></h1>
+
+<p class="intro prose">
+  Open submissions awaiting judgement. Hit 👍 on GitHub to push one over the
+  bar — <strong>10 👍</strong> (with more 👍 than 👎) auto-publishes it.
+</p>
+
+{%- if pending.items and pending.items.length %}
+<ol class="board">
+  {%- for item in pending.items %}
+  <li class="board-row">
+    <a class="board-link" href="{{ item.url }}" rel="noopener" target="_blank">
+      <span class="board-rank mono">{{ item.up }}👍</span>
+      <span class="board-body">
+        <span class="board-title">{{ item.title }}</span>
+        <span class="board-stats mono">
+          <span class="board-stat board-score">{{ item.up }} 👍</span>
+          <span class="board-stat">{{ item.down }} 👎</span>
+          <span class="board-stat">vote on GitHub →</span>
+        </span>
+      </span>
+    </a>
+  </li>
+  {%- endfor %}
+</ol>
+{%- else %}
+<p class="prose">
+  Nothing on the desk right now.
+  <a href="https://github.com/{{ site.repo }}/issues/new?template=slop-sighting.yml" rel="noopener">Submit a sighting →</a>
+</p>
+{%- endif %}

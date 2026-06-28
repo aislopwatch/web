@@ -1,0 +1,1578 @@
+/* ==========================================================================
+   AISLOPWATCH
+   Editorial brutalism. Warm paper, ink, one correction-red.
+   System fonts only (no webfont requests): native sans (display), native
+   serif (body), native mono (metadata / code). Honest "no trackers".
+   ========================================================================== */
+
+:root {
+  --paper: #f2eee3;
+  --paper-2: #e9e3d4;
+  --ink: #161410;
+  --ink-soft: #44403a;
+  --ink-muted: #615b50; /* ~5.4:1 on paper, clears AA on paper-2 too */
+  --red: #bf1d1d; /* WCAG AA: ~5:1 on paper, white-on-red ~4.6:1 for badges */
+  --red-ink: #f7d7d2;
+  --tape: #9a6b16; /* evidence-amber — structural/filing accent only, never body */
+  --rule: #d8d2c4;
+  --code-bg: #161410;
+  --code-fg: #f2eee3;
+  color-scheme: light;
+
+  --measure: 64ch;
+  --display: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  --body: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo,
+    Consolas, monospace;
+}
+
+/* ---- Dark mode ---------------------------------------------------------- */
+/* The whole design reads from these variables, so overriding them flips the
+   entire site. Follow the OS by default; the nav toggle forces a choice by
+   setting [data-theme] on <html>, which wins over the media query. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #15130e;
+    --paper-2: #201d16;
+    --ink: #ece6d8;
+    --ink-soft: #bdb6a6;
+    --ink-muted: #978f7d;
+    --red: #ff5247;
+    --red-ink: #4a1d18;
+    --tape: #d6a23e;
+    --rule: #322d23;
+    --code-bg: #0e0c08;
+    --code-fg: #ece6d8;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #15130e;
+  --paper-2: #201d16;
+  --ink: #ece6d8;
+  --ink-soft: #bdb6a6;
+  --ink-muted: #8a8474;
+  --red: #ff5247;
+  --red-ink: #4a1d18;
+  --rule: #322d23;
+  --code-bg: #0e0c08;
+  --code-fg: #ece6d8;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--paper);
+  /* faint paper grain, pure CSS, no asset */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 1.18rem;
+  line-height: 1.65;
+  font-optical-sizing: auto;
+}
+
+.mono {
+  font-family: var(--mono);
+}
+
+/* selection: red pen */
+::selection {
+  background: var(--red);
+  color: var(--paper);
+}
+
+a {
+  color: var(--ink);
+  text-decoration-color: var(--red);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 2px;
+}
+a:hover {
+  color: var(--red);
+}
+
+/* Visible keyboard focus for every interactive element, theme-aware. */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
+}
+
+/* Visually hidden but available to screen readers. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---- Skip link (keyboard / screen readers) ------------------------------ */
+
+.skip-link {
+  position: absolute;
+  left: 0.5rem;
+  top: -3.5rem;
+  z-index: 100;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 0.5rem 0.9rem;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: top 0.15s ease;
+}
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+/* ---- Masthead ----------------------------------------------------------- */
+
+.masthead {
+  position: relative;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.7rem 1.5rem 0.7rem;
+  animation: rise 0.6s ease both;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: baseline;
+  text-decoration: none;
+  line-height: 0.9;
+}
+.brand-name {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(2.3rem, 8vw, 4.6rem);
+  letter-spacing: -0.04em;
+  color: var(--ink);
+}
+.cursor {
+  color: var(--red);
+  font-family: var(--display);
+  font-size: clamp(1.7rem, 6vw, 3.2rem);
+  margin-left: 0.12em;
+  animation: cursorfade 2.4s ease-in-out infinite;
+}
+
+.tagline {
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+  margin: 0.35rem 0 1rem;
+  max-width: 52ch;
+}
+
+/* Sticky navigation bar: stays pinned to the top while posts scroll. */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--paper);
+  border-bottom: 3px solid var(--ink);
+  animation: fadein 0.6s ease both;
+}
+.navbar-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0.55rem 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1.4rem;
+  font-size: 0.85rem;
+  text-transform: lowercase;
+  letter-spacing: 0.04em;
+}
+.navbar-inner a {
+  text-decoration: none;
+  padding-bottom: 2px;
+  border-bottom: 2px solid transparent;
+}
+.navbar-inner a:hover {
+  border-bottom-color: var(--red);
+}
+
+/* Top-right of the masthead, out of the nav bar. */
+.theme-toggle {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.5rem;
+  z-index: 5;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  text-transform: lowercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+}
+.theme-toggle:hover {
+  color: var(--red);
+  border-color: var(--red);
+}
+
+/* Icon-only nav link (random dice). */
+.nav-icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--ink);
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.nav-icon:hover {
+  color: var(--red);
+  border-bottom-color: transparent;
+}
+.icon-dice {
+  display: block;
+  transition: transform 0.2s ease;
+}
+.nav-icon:hover .icon-dice,
+.footer-icon:hover .icon-dice {
+  transform: rotate(-16deg);
+}
+
+/* Primary call to action in the nav: push it (and the toggle) to the right. */
+.nav-cta {
+  margin-left: auto;
+  text-decoration: none;
+  border: 2px solid var(--ink);
+  padding: 0.25rem 0.7rem;
+}
+.nav-cta:hover {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--paper);
+}
+
+/* ---- Main wrap ---------------------------------------------------------- */
+
+.wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.8rem 1.5rem 4rem;
+  animation: rise 0.7s 0.05s ease both;
+}
+
+/* ---- Homepage: intro + post list --------------------------------------- */
+
+.intro {
+  max-width: var(--measure);
+  font-size: 1.12rem;
+  color: var(--ink-soft);
+  margin-bottom: 1.8rem;
+}
+.intro p {
+  margin: 0;
+}
+
+.postlist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+.postlist-item {
+  border-bottom: 1px solid var(--rule);
+}
+.postlist-link {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1.4rem;
+  align-items: start;
+  padding: 1.5rem 0.4rem;
+  text-decoration: none;
+  transition: padding-left 0.18s ease, background 0.18s ease;
+}
+.postlist-link:hover {
+  padding-left: 1.1rem;
+  background: var(--paper-2);
+}
+.postlist-index {
+  font-size: 0.8rem;
+  color: var(--red);
+  padding-top: 0.55rem;
+  font-weight: 700;
+}
+.postlist-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.postlist-date {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.postlist-title {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 4vw, 2.1rem);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--ink);
+}
+.postlist-link:hover .postlist-title {
+  color: var(--red);
+}
+.postlist-dek {
+  font-size: 1.02rem;
+  color: var(--ink-soft);
+  max-width: 60ch;
+}
+.postlist-arrow {
+  align-self: center;
+  color: var(--ink-muted);
+  font-size: 1.2rem;
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+.postlist-link:hover .postlist-arrow {
+  transform: translateX(4px);
+  color: var(--red);
+}
+
+/* ---- Taxonomy legend (homepage) ----------------------------------------- */
+
+.legend {
+  margin: 0 0 1.8rem;
+}
+.legend-label {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  font-variant-caps: all-small-caps;
+  text-transform: lowercase;
+  color: var(--ink-muted);
+  margin-bottom: 0.5rem;
+}
+.legend-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.6rem;
+}
+.legend-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.legend-list .badge {
+  text-decoration: none;
+}
+.legend-blurb {
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+}
+
+/* ---- Sort bar (homepage) ------------------------------------------------- */
+
+.sortbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.9rem;
+  font-size: 0.78rem;
+  margin-bottom: 1.2rem;
+}
+.sortbar-label {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+}
+.sortbar button {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  background: none;
+  border: 0;
+  color: var(--ink-soft);
+  border-bottom: 2px solid transparent;
+  padding: 0 0 1px;
+  cursor: pointer;
+}
+.sortbar button:hover,
+.sortbar button.is-active {
+  color: var(--red);
+  border-bottom-color: var(--red);
+}
+
+/* "new since last visit" flag */
+.new-flag {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--paper);
+  background: var(--tape);
+  padding: 0.12em 0.45em;
+  vertical-align: 0.22em;
+}
+
+/* ---- Tags + filter bar -------------------------------------------------- */
+
+.postlist-tags {
+  margin-top: 0.4rem;
+  font-size: 0.74rem;
+  letter-spacing: 0.03em;
+}
+.postlist-tags .tag {
+  margin-right: 0.45rem;
+}
+
+a.tag {
+  text-decoration: none;
+}
+a.tag:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--red);
+  text-underline-offset: 2px;
+}
+
+.tagbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.9rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+  margin-bottom: 1.8rem;
+  padding-bottom: 1.1rem;
+  border-bottom: 1px solid var(--rule);
+}
+.tagbar-label {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+}
+.tagbar a {
+  text-decoration: none;
+  color: var(--ink-soft);
+  border-bottom: 2px solid transparent;
+  padding-bottom: 1px;
+}
+.tagbar a:hover,
+.tagbar a.is-active {
+  color: var(--red);
+  border-bottom-color: var(--red);
+}
+.tagbar-count {
+  color: var(--ink-muted);
+  font-size: 0.72em;
+}
+.filter-empty {
+  margin: 1.5rem 0;
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+}
+.empty-state {
+  margin-top: 2rem;
+  font-size: 1.1rem;
+  color: var(--ink-soft);
+}
+
+/* ---- Verdict badges ----------------------------------------------------- */
+/* A correction-stamp chip naming the post's category. `badge-stamp` (slop /
+   hype) reads as a red stamp; the rest are quiet outlined chips. */
+.badge {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  padding: 0.28em 0.5em;
+  border: 1px solid var(--ink-soft);
+  color: var(--ink-soft);
+  vertical-align: 0.05em;
+}
+.badge-stamp {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--paper);
+}
+
+.tagpage-title {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin: 0 0 1.4rem;
+}
+
+/* ---- Hall of Shame (homepage teaser) ------------------------------------ */
+
+.shame {
+  border: 2px solid var(--ink);
+  padding: 1rem 1.2rem 1.2rem;
+  margin-bottom: 1.8rem;
+  background: var(--paper-2);
+}
+.shame-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  font-size: 0.74rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 0.7rem;
+}
+.shame-head a {
+  text-decoration: none;
+  color: var(--red);
+}
+.shame-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.shame-item + .shame-item {
+  border-top: 1px solid var(--rule);
+}
+.shame-link {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.9rem;
+  align-items: baseline;
+  padding: 0.55rem 0;
+  text-decoration: none;
+}
+.shame-rank {
+  color: var(--red);
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.shame-title {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.shame-link:hover .shame-title {
+  color: var(--red);
+}
+.shame-score {
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+/* ---- Hall of Shame (full board, /trending/) ----------------------------- */
+
+.board-slab {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.14em;
+  padding: 0.6rem 0.9rem;
+}
+.board-slab span {
+  font-weight: 400;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--paper-2);
+}
+.board {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+/* #1 = primary suspect: the live re-sort puts the top blame here, so styling
+   :first-child gives a "most wanted" feature card with zero template branching. */
+.board-row:first-child .board-link {
+  background: var(--paper-2);
+  padding: 1.6rem 0.9rem;
+}
+.board-row:first-child .board-title {
+  font-size: clamp(1.7rem, 5vw, 2.6rem);
+}
+.board-row:first-child .board-rank {
+  font-size: 1.1rem;
+}
+.board-row:first-child .board-score {
+  font-size: 1.1rem;
+}
+.board-row {
+  border-bottom: 1px solid var(--rule);
+}
+.board-link {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1.2rem;
+  align-items: center;
+  padding: 1.1rem 0.4rem;
+  text-decoration: none;
+  transition: padding-left 0.18s ease, background 0.18s ease;
+}
+.board-link:hover {
+  padding-left: 1rem;
+  background: var(--paper-2);
+}
+.board-rank {
+  font-size: 0.85rem;
+  color: var(--red);
+  font-weight: 700;
+}
+.board-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.board-title {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  color: var(--ink);
+}
+.board-link:hover .board-title {
+  color: var(--red);
+}
+.board-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+}
+.board-score {
+  color: var(--red);
+  font-weight: 700;
+}
+.board-arrow {
+  color: var(--ink-muted);
+  font-size: 1.2rem;
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+.board-link:hover .board-arrow {
+  transform: translateX(4px);
+  color: var(--red);
+}
+
+/* ---- Post ---------------------------------------------------------------- */
+
+.post {
+  max-width: var(--measure);
+}
+.back {
+  display: inline-block;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink-muted);
+  margin-bottom: 2rem;
+}
+.back:hover {
+  color: var(--red);
+}
+
+/* Prev/next row below the nav bar, right-aligned under the dark toggle. */
+.postnav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.4rem;
+  margin-bottom: 1.6rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.postnav a {
+  position: relative;
+  text-decoration: none;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+.postnav a:hover {
+  color: var(--red);
+}
+.postnav-title {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.45rem;
+  max-width: 60vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  padding: 0.3rem 0.55rem;
+  font-size: 0.72rem;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--ink-soft);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 5;
+}
+.postnav a:hover .postnav-title {
+  opacity: 1;
+}
+
+/* Prev/next footer at the end of a post — always shown, both sizes. */
+.postnav-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  margin-top: 3.5rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.95rem;
+}
+.postnav-bottom a {
+  text-decoration: none;
+  color: var(--ink-soft);
+  max-width: 47%;
+}
+.postnav-bottom a:hover {
+  color: var(--red);
+}
+.postnav-bottom .pn-next {
+  margin-left: auto;
+  text-align: right;
+}
+.postnav-bottom .postnav-dir {
+  display: block;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.25rem;
+}
+
+.post-head {
+  margin-bottom: 2.5rem;
+}
+.post-meta {
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 0.9rem;
+}
+.tag {
+  color: var(--red);
+}
+.post-title {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(2.2rem, 6vw, 3.6rem);
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+  margin: 0;
+}
+.post-dek {
+  font-style: italic;
+  font-size: 1.3rem;
+  color: var(--ink-soft);
+  margin: 0.9rem 0 0;
+}
+
+/* ---- Case file dossier --------------------------------------------------- */
+/* Filing furniture sits on the TOP edge (perforation dots), never a left rule. */
+.casefile {
+  border-top: 3px solid var(--ink);
+  padding-top: 1.1rem;
+  background-image: radial-gradient(var(--rule) 1.5px, transparent 1.6px);
+  background-size: 14px 14px;
+  background-position: 0 2px;
+  background-repeat: repeat-x;
+}
+.casefile-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.7rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  font-variant-caps: all-small-caps;
+  text-transform: lowercase;
+  color: var(--ink-muted);
+  margin-bottom: 1rem;
+}
+.casefile-no {
+  color: var(--tape);
+  font-weight: 700;
+}
+.casefile-sep {
+  color: var(--rule);
+}
+/* The verdict rubber stamp — rotated, inked, pushed to the right of the strip. */
+.stamp {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  padding: 0.3em 0.7em;
+  border: 2px solid var(--ink-soft);
+  color: var(--ink-soft);
+  transform: rotate(-3deg);
+}
+.stamp-red {
+  border-color: var(--red);
+  color: var(--red);
+}
+.casefile-class {
+  margin-top: 1.1rem;
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+}
+.casefile-class-label {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.12em;
+  color: var(--ink-muted);
+  margin-right: 0.5rem;
+}
+.casefile-class .tag {
+  text-decoration: none;
+  margin-right: 0.4rem;
+}
+.casefile-class .tag::before {
+  content: "#";
+  color: var(--ink-muted);
+}
+
+/* ---- Exhibit frames (screenshots, JS-enhanced) -------------------------- */
+.prose figure.exhibit {
+  margin: 2rem 0;
+}
+.prose figure.exhibit img {
+  margin: 0;
+  border-bottom: 0;
+}
+.exhibit-cap {
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  color: var(--ink-soft);
+  background: var(--paper-2);
+  border: 2px solid var(--ink);
+  border-top: 0;
+  padding: 0.5rem 0.7rem;
+}
+.exhibit-no {
+  color: var(--tape);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+/* Tabular figures so live counters don't jitter as digits change. */
+.mono,
+.casefile-no,
+.blame-votes,
+.blame-views,
+.live-votes,
+.live-views,
+.board-score {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Stamp-down reaction on a successful blame (reduced-motion rule disables it). */
+@keyframes stampdown {
+  0% { transform: scale(1) rotate(0); }
+  35% { transform: scale(0.92) rotate(-2deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+.blame-btn.is-stamped {
+  animation: stampdown 0.32s ease;
+}
+
+/* ---- Prose (markdown body) --------------------------------------------- */
+
+.prose {
+  max-width: var(--measure);
+}
+.prose > * + * {
+  margin-top: 1.4rem;
+}
+.prose h2 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.7rem;
+  letter-spacing: -0.02em;
+  margin-top: 2.8rem;
+  line-height: 1.1;
+}
+.prose h2::before {
+  content: "§ ";
+  color: var(--red);
+  font-family: var(--mono);
+  font-size: 1.1rem;
+}
+.prose h3 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.3rem;
+  margin-top: 2rem;
+}
+.prose a {
+  font-weight: 500;
+}
+.prose strong {
+  font-weight: 600;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.4rem;
+}
+.prose li + li {
+  margin-top: 0.6rem;
+}
+.prose ul {
+  list-style: none;
+  padding-left: 0;
+}
+.prose ul > li {
+  padding-left: 1.6rem;
+  position: relative;
+}
+.prose ul > li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: var(--red);
+  font-family: var(--mono);
+}
+.prose ol {
+  counter-reset: item;
+  list-style: none;
+  padding-left: 0;
+}
+.prose ol > li {
+  counter-increment: item;
+  padding-left: 2.2rem;
+  position: relative;
+}
+.prose ol > li::before {
+  content: counter(item, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  color: var(--red);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  top: 0.25em;
+}
+
+.prose blockquote {
+  margin: 1.8rem 0;
+  padding: 0;
+  font-style: italic;
+  font-size: 1.25rem;
+  color: var(--ink-soft);
+}
+.prose blockquote p {
+  margin: 0;
+}
+
+.prose img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 2rem 0;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+}
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 2.6rem 0;
+}
+
+/* Tables */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  font-size: 0.95rem;
+}
+.prose th,
+.prose td {
+  border: 1px solid var(--rule);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+}
+.prose thead th {
+  border-bottom: 2px solid var(--ink);
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.prose tbody tr:nth-child(even) {
+  background: var(--paper-2);
+}
+
+/* Inline bits: keyboard keys, highlight, strikethrough */
+.prose kbd {
+  font-family: var(--mono);
+  font-size: 0.8em;
+  background: var(--paper-2);
+  border: 1px solid var(--ink-muted);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 0.05em 0.4em;
+}
+.prose mark {
+  background: var(--red-ink);
+  color: var(--ink);
+  padding: 0.02em 0.22em;
+}
+.prose del {
+  color: var(--ink-muted);
+}
+
+/* Task lists (markdown-it-task-lists): swap the dash marker for a checkbox */
+.prose ul > li.task-list-item {
+  padding-left: 0;
+}
+.prose ul > li.task-list-item::before {
+  content: none;
+}
+.prose .task-list-item input {
+  margin-right: 0.55rem;
+  accent-color: var(--red);
+}
+
+/* Footnotes (markdown-it-footnote) */
+.prose .footnote-ref a {
+  color: var(--red);
+  text-decoration: none;
+  font-weight: 600;
+}
+.prose .footnotes {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+.prose .footnote-backref {
+  color: var(--red);
+  text-decoration: none;
+}
+
+/* Collapsible details */
+.prose details {
+  border: 1px solid var(--rule);
+  padding: 0.6rem 1rem;
+  margin: 1.8rem 0;
+}
+.prose summary {
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.prose details[open] summary {
+  margin-bottom: 0.6rem;
+  color: var(--red);
+}
+
+/* code */
+.prose code {
+  font-family: var(--mono);
+  font-size: 0.88em;
+  background: var(--paper-2);
+  padding: 0.12em 0.38em;
+  border: 1px solid var(--rule);
+}
+.prose pre {
+  background: var(--code-bg);
+  color: var(--code-fg);
+  border: 2px solid var(--code-bg);
+  padding: 1.1rem 1.3rem;
+  overflow-x: auto;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+.prose pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: 0.92rem;
+}
+
+/* Prism syntax tokens, tuned for the dark code block + warm palette.
+   Added by @11ty/eleventy-plugin-syntaxhighlight (build-time, no client JS). */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #8a8474;
+  font-style: italic;
+}
+.token.punctuation {
+  color: #b8b2a3;
+}
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  color: #e88a86;
+}
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  color: #c7c08a;
+}
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  color: #d8d2c4;
+}
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: #f07a74;
+}
+.token.function,
+.token.class-name {
+  color: #e9b44c;
+}
+.token.regex,
+.token.important,
+.token.variable {
+  color: #e88a86;
+}
+.token.important,
+.token.bold {
+  font-weight: 700;
+}
+.token.italic {
+  font-style: italic;
+}
+
+/* ---- Related posts ------------------------------------------------------ */
+
+.related {
+  margin-top: 3rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--rule);
+}
+.related-head {
+  font-size: 0.74rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin: 0 0 0.7rem;
+}
+.related-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.related-list a {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-decoration: none;
+}
+.related-list a:hover {
+  color: var(--red);
+}
+
+/* ---- Comments (optional, giscus) --------------------------------------- */
+
+.comments {
+  margin-top: 4rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 1.5rem;
+}
+.comments-title {
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 1rem;
+}
+
+/* ---- Share + submit CTA on a post --------------------------------------- */
+
+.share {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1rem;
+  margin-top: 3rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.8rem;
+}
+.share-label {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+}
+.share a,
+.share-copy {
+  text-decoration: none;
+  color: var(--ink-soft);
+  border-bottom: 2px solid transparent;
+  padding-bottom: 1px;
+}
+.share a:hover,
+.share-copy:hover {
+  color: var(--red);
+  border-bottom-color: var(--red);
+}
+.share-copy {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  background: none;
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  cursor: pointer;
+}
+.post-cta {
+  margin-top: 1.4rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.post-cta a {
+  color: var(--red);
+  text-decoration: none;
+  font-weight: 600;
+}
+.post-report {
+  margin-top: 0.5rem;
+  font-size: 0.74rem;
+  color: var(--ink-muted);
+}
+.post-report a {
+  color: var(--ink-soft);
+}
+
+/* ---- Live blame counter (Cloudflare D1) --------------------------------- */
+
+.blame {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.7rem 1rem;
+  margin-top: 2.6rem;
+}
+.blame-btn {
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  color: var(--ink);
+  background: none;
+  border: 2px solid var(--ink);
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+}
+.blame-btn:hover:not(:disabled) {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--paper);
+}
+.blame-btn:disabled {
+  background: none;
+  color: var(--ink-muted);
+  border-color: var(--ink-muted);
+  cursor: default;
+}
+.blame-stats {
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+}
+.blame-votes,
+.blame-views {
+  color: var(--red);
+  font-weight: 700;
+}
+.blame-note {
+  flex-basis: 100%;
+  font-size: 0.68rem;
+  color: var(--ink-muted);
+}
+.blame-undo {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  background: none;
+  border: 0;
+  color: var(--ink-muted);
+  text-decoration: underline;
+  text-decoration-color: var(--rule);
+  cursor: pointer;
+}
+.blame-undo:hover {
+  color: var(--red);
+}
+
+/* ---- Lightbox (screenshot zoom) ----------------------------------------- */
+
+.prose img.zoomable {
+  cursor: zoom-in;
+}
+.lightbox {
+  border: 0;
+  padding: 0;
+  margin: auto;
+  max-width: 96vw;
+  max-height: 96vh;
+  background: transparent;
+}
+.lightbox::backdrop {
+  background: rgba(8, 7, 4, 0.86);
+}
+.lightbox img {
+  display: block;
+  max-width: 96vw;
+  max-height: 92vh;
+  width: auto;
+  height: auto;
+  border: 2px solid var(--paper);
+}
+.lightbox-close {
+  position: absolute;
+  top: -0.2rem;
+  right: 0;
+  transform: translateY(-100%);
+  font-family: var(--mono);
+  font-size: 1rem;
+  background: var(--paper);
+  color: var(--ink);
+  border: 0;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+}
+.lightbox-close:hover {
+  background: var(--red);
+  color: var(--paper);
+}
+
+/* ---- 404 ---------------------------------------------------------------- */
+
+.error404 h1 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(2rem, 7vw, 3.4rem);
+  letter-spacing: -0.03em;
+}
+.error404-exits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.4rem;
+  margin-top: 2rem;
+  font-size: 0.85rem;
+}
+
+/* ---- Footer ------------------------------------------------------------- */
+
+.site-footer {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.8rem 1.5rem 2.6rem;
+  border-top: 3px solid var(--ink);
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+}
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1.4rem;
+}
+.footer-links a {
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  padding-bottom: 1px;
+}
+.footer-links a:hover {
+  color: var(--red);
+  border-bottom-color: var(--red);
+}
+.footer-icon {
+  display: inline-flex;
+  align-items: center;
+  border-bottom: 0 !important;
+  color: var(--ink-soft);
+}
+.footer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.3rem 1rem;
+  color: var(--ink-muted);
+}
+.footer-meta span {
+  white-space: nowrap;
+}
+
+/* ---- Motion ------------------------------------------------------------- */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes cursorfade {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ---- Small screens ------------------------------------------------------ */
+
+@media (max-width: 640px) {
+  body {
+    font-size: 1.08rem;
+  }
+  /* Tighten the header so posts are visible almost immediately. */
+  .masthead {
+    padding: 1.1rem 1.1rem 0.9rem;
+  }
+  .tagline {
+    font-size: 0.96rem;
+    margin: 0.3rem 0 0.7rem;
+  }
+  .navbar-inner {
+    gap: 1.1rem;
+    padding: 0.5rem 1.1rem;
+  }
+  .wrap {
+    padding: 1.2rem 1.1rem 3rem;
+  }
+  .intro {
+    font-size: 1.02rem;
+    margin-bottom: 1.3rem;
+  }
+  .postlist-link {
+    grid-template-columns: auto 1fr;
+    gap: 0 1rem;
+    padding: 1.1rem 0.2rem;
+  }
+  .postlist-arrow {
+    display: none;
+  }
+
+  /* Post prev/next stacks vertically (merged from the second mobile block). */
+  .postnav-bottom {
+    flex-direction: column;
+  }
+  .postnav-bottom a {
+    max-width: 100%;
+  }
+  .postnav-bottom .pn-next {
+    margin-left: 0;
+    text-align: left;
+  }
+
+  /* Don't orphan the CTA on its own right-aligned row; let it flow inline. */
+  .nav-cta {
+    margin-left: 0;
+  }
+
+  /* Comfortable tap targets (WCAG 2.5.8) for closely-spaced controls. */
+  .navbar-inner a,
+  .nav-cta,
+  .tagbar a,
+  .share a,
+  .share-copy,
+  .site-footer a {
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+  }
+  .tagbar {
+    gap: 0.2rem 0.9rem;
+  }
+
+  /* Theme toggle: slimmer + symbol-only + less prominent on phones. */
+  .theme-toggle {
+    top: 0.8rem;
+    right: 1rem;
+    padding: 0.2rem 0.35rem;
+    font-size: 0.95rem;
+    border-color: transparent;
+    background: transparent;
+  }
+  .tt-label {
+    display: none;
+  }
+}
