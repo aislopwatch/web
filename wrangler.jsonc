@@ -1,8 +1,7 @@
 {
   // Cloudflare Pages config for the live engagement layer (view counts +
   // in-page "blame" votes). The static site is the Eleventy output in public/;
-  // Pages serves functions/ as /api/*. GitHub Pages ignores all of this and
-  // just serves public/, so the two hosts coexist until the domain is flipped.
+  // Pages serves functions/ as /api/*.
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "aislopwatch",
   "pages_build_output_dir": "./public",
@@ -15,7 +14,7 @@
     {
       "binding": "DB",
       "database_name": "aislopwatch-engagement",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID"
+      "database_id": "c252cda0-9e4b-4050-9f50-cc65344b919a"
     }
   ]
 }
