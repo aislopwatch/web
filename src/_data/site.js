@@ -30,10 +30,10 @@ export default {
   //   3. go to https://giscus.app/, enter aislopwatch/web, mapping = pathname,
   //      copy repoId + categoryId into the placeholders below
   comments: {
-    enabled: false,
+    enabled: true,
     repo: "aislopwatch/web",
-    repoId: "REPLACE_WITH_GISCUS_REPO_ID",
+    repoId: "R_kgDOTAJhAw",
     category: "Announcements",
-    categoryId: "REPLACE_WITH_GISCUS_CATEGORY_ID",
+    categoryId: "DIC_kwDOTAJhA84DACaS",
   },
 };
