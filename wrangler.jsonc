@@ -1,15 +1,24 @@
 {
-  // Cloudflare Pages config for the live engagement layer (view counts +
-  // in-page "blame" votes). The static site is the Eleventy output in public/;
-  // Pages serves functions/ as /api/*.
+  // Cloudflare Worker for AISlopWatch: serves the static site (Eleventy output
+  // in public/) via Workers Static Assets, and runs the live engagement API
+  // (view counts + "blame" votes) under /api/*. The Worker entry routes /api/*
+  // to worker/api/* and hands everything else to the ASSETS binding.
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "aislopwatch",
-  "pages_build_output_dir": "./public",
+  "main": "worker/index.js",
   "compatibility_date": "2025-06-01",
 
-  // Live engagement store. Create it once with:
+  // Static site. Assets matching a request are served directly (the Worker only
+  // runs for /api/* and unmatched paths). 404s fall back to public/404.html.
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page"
+  },
+
+  // Live engagement store. Created with:
   //   npx wrangler d1 create aislopwatch-engagement
-  // then paste the printed database_id here (and apply migrations/).
+  // schema in migrations/ (apply with npm run cf:migrate[:local]).
   "d1_databases": [
     {
       "binding": "DB",

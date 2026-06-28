@@ -13,10 +13,10 @@
     "build": "eleventy && pagefind --site public",
     "build:fast": "eleventy",
     "clean": "rm -rf public",
-    "cf:dev": "npm run build && wrangler pages dev ./public",
+    "cf:dev": "npm run build && wrangler dev",
     "cf:migrate": "wrangler d1 migrations apply aislopwatch-engagement --remote",
     "cf:migrate:local": "wrangler d1 migrations apply aislopwatch-engagement --local",
-    "cf:deploy": "npm run build && wrangler pages deploy ./public"
+    "cf:deploy": "npm run build && wrangler deploy"
   },
   "devDependencies": {
     "@11ty/eleventy": "^3.0.0",
